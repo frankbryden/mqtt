@@ -38,6 +38,8 @@ func LoadConnectPacket(data []byte) (*ConnectPacket, error) {
 	for i := 0; i < 10; i++ {
 		log.Printf("Byte: %d: %08b (-> %d)", i+1, payload[i], payload[i])
 	}
+	versionNumber := payload[6]
+	log.Printf("Client using mqtt version %d", versionNumber)
 
 	connectPacket := ConnectPacket{}
 
