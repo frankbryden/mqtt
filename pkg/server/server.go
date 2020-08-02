@@ -54,8 +54,9 @@ func (s *Server) HandleConn(conn net.Conn) {
 		log.Println(connectPacket)
 		connackPacket := data.NewConnackPacket(connectPacket)
 		conn.Write(connackPacket.ToByteArray())
+
+		c := NewClient(conn, connectPacket)
+		c.Run()
 	}
 
-	parsed := string(buffer)
-	log.Printf("Data: %s", parsed)
 }

@@ -139,3 +139,23 @@ func loadFlags(payload []byte) *ConnectPacketFlags {
 
 	return flagsInstance
 }
+
+//GetClientID returns client ID associated with client
+func (c *ConnectPacket) GetClientID() string {
+	return c.clientID
+}
+
+//ShouldRetain returns true if clients wishes to retain info
+func (c *ConnectPacket) ShouldRetain() bool {
+	return c.retain
+}
+
+//GetQos returns Qos associated with client
+func (c *ConnectPacket) GetQos() int {
+	return c.qos
+}
+
+//ShouldCleanSession returns true if client wishes to clean session
+func (c *ConnectPacket) ShouldCleanSession() bool {
+	return c.cleanSession
+}

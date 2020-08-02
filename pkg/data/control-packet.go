@@ -9,33 +9,33 @@ type PacketType int
 
 const (
 	//CONNECT client -> server
-	CONNECT = iota + 1
+	CONNECT = 1
 	//CONNACK server -> client
-	CONNACK = iota
+	CONNACK = 2
 	//PUBLISH client -> server
-	PUBLISH = iota
+	PUBLISH = 3
 	//PUBACK server -> client
-	PUBACK = iota
+	PUBACK = 4
 	//PUBREC packet type
-	PUBREC = iota
+	PUBREC = 5
 	//PUBREL packet type
-	PUBREL = iota
+	PUBREL = 6
 	//PUBCOMP packet type
-	PUBCOMP = iota
+	PUBCOMP = 7
 	//SUBSCRIBE client -> server
-	SUBSCRIBE = iota
+	SUBSCRIBE = 8
 	//SUBACK server -> client
-	SUBACK = iota
+	SUBACK = 9
 	//UNSUBSCRIBE client -> server
-	UNSUBSCRIBE = iota
+	UNSUBSCRIBE = 10
 	//UNSUBACK server -> client
-	UNSUBACK = iota
+	UNSUBACK = 11
 	//PINGREQ server -> client
-	PINGREQ = iota
+	PINGREQ = 12
 	//PINGRESP server -> client
-	PINGRESP = iota
+	PINGRESP = 13
 	//DISCONNECT server -> client
-	DISCONNECT = iota
+	DISCONNECT = 14
 )
 
 //ControlPacket contains information about a single control packet

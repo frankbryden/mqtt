@@ -21,7 +21,9 @@ const (
 
 //Subscription represents a single subscription. A topic can be matched against .
 type Subscription struct {
-	filter Topic
+	filter   Topic
+	clientID string
+	qos      int
 }
 
 //NewSubscriptionFromTopic constructs a new subscription from a Topic instance
@@ -140,4 +142,19 @@ func (t Topic) String() string {
 		b.WriteString("'")
 	}
 	return b.String()
+}
+
+//GetClientID returns client id
+func (s *Subscription) GetClientID() string {
+	return s.clientID
+}
+
+//GetQos returns qos
+func (s *Subscription) GetQos() int {
+	return s.qos
+}
+
+//GetFilter returns Topic (filter)
+func (s *Subscription) GetFilter() Topic {
+	return s.filter
 }

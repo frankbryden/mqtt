@@ -32,6 +32,6 @@ func RemainingLengthDecode(data []byte) (int, int) {
 func GetUTFString(data []byte) (string, int) {
 	lengthData := data[:2]
 	length := int(lengthData[0])*256 + int(lengthData[1])
-	log.Printf("From %08b %08b, we get %d (%s)", lengthData[0], lengthData[1], length, data[2:length+1])
+	log.Printf("From %08b %08b, we get %d (%s)", lengthData[0], lengthData[1], length, data[2:length+2])
 	return string(data[2 : length+2]), length + 2
 }
