@@ -30,60 +30,25 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 	topicName, n := util.GetUTFString(variableHeader)
 	log.Printf("The packet is %d bytes long", packetSize)
 
-	variableHeader = data[bytesRead+1:]
+	variableHeader = data[n+1:]
 
 	//check qos to see if packet id will be present
 	packetID := -1
+	byteShift := 0
 	if qos > 0 {
-		packetID = 
+		byteShift = 2
+		packetID = int(variableHeader[0])*256 + int(variableHeader[1])
 	}
 
-	payload := variableHeader[bytesRead : packetSize+1]
+	payload := variableHeader[bytesRead+byteShift+1 : packetSize+1]
 	log.Printf("Payload: %v, %s", payload, payload)
 	for i := 0; i < 10; i++ {
 		log.Printf("Byte: %d: %08b (-> %d)", i+1, payload[i], payload[i])
 	}
-	versionNumber := payload[6]
-	log.Printf("Client using mqtt version %d", versionNumber)
 
-	connectPacket := ConnectPacket{}
+	publishData, n := util.GetUTFString(payload)
 
-	flagsInstance := loadFlags(payload)
-	connectPacket.flags = flagsInstance
-
-	payload = payload[10:]
-
-	//Client Identifier, Will Topic, Will Message, User Name, Password
-
-	//Client Identifier
-	clientID, n := util.GetUTFString(payload)
-	connectPacket.clientID = clientID
-	payload = payload[n:]
-
-	//Will Topic/Message
-	if flagsInstance.willFlag {
-		willTopic, n := util.GetUTFString(payload)
-		connectPacket.willTopic = willTopic
-		payload = payload[n:]
-
-		willMessage, n := util.GetUTFString(payload)
-		connectPacket.willMessage = willMessage
-		payload = payload[n:]
-	}
-
-	//User name
-	if flagsInstance.usernameFlag {
-		username, n := util.GetUTFString(payload)
-		connectPacket.username = username
-		payload = payload[n:]
-	}
-
-	//Password
-	if flagsInstance.usernameFlag {
-		password, n := util.GetUTFString(payload)
-		connectPacket.password = password
-		payload = payload[n:]
-	}
+	log.Printf("[%d] %s -> %s", packetID, topicName, publishData)
 
 	return &PublishPacket{}, nil
 }
