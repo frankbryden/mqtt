@@ -17,6 +17,7 @@ willTopic, willMessage string
 //Client is an active connection to a client.
 //Will eventually be used to keep track of state in persistent storage
 type Client struct {
+	server       *Server
 	conn         net.Conn
 	clientID     string
 	retain       bool
@@ -26,8 +27,9 @@ type Client struct {
 
 //NewClient constructs a client instance from the associated connection
 //and received data contained in the connect packet
-func NewClient(conn net.Conn, clientData *data.ConnectPacket) *Client {
+func NewClient(server *Server, conn net.Conn, clientData *data.ConnectPacket) *Client {
 	return &Client{
+		server:       server,
 		conn:         conn,
 		clientID:     clientData.GetClientID(),
 		retain:       clientData.ShouldRetain(),
@@ -45,9 +47,19 @@ func (c *Client) serveRequests() {
 	for {
 		//Read(b []byte) (n int, err error)
 		buffer := make([]byte, 256)
-		n, _ := c.conn.Read(buffer)
+		n, e := c.conn.Read(buffer)
+		if e != nil {
+			log.Print(e)
+			log.Printf("%s closed the connection", c.clientID)
+			c.conn.Close()
+			return
+		}
 
 		log.Printf("Read %d bytes", n)
+		if n == 0 {
+			log.Printf("Skipping empty read")
+			continue
+		}
 		log.Print(buffer)
 		log.Print(string(buffer))
 
@@ -63,8 +75,14 @@ func (c *Client) serveRequests() {
 		case data.SUBSCRIBE:
 			log.Print("Subscribe")
 			subscribePacket, _ := data.LoadSubscribePacket(buffer, c.clientID)
+			//Handle the subscription packet
+			for _, sub := range subscribePacket.GetSubscriptions() {
+				c.server.subManager.Subscribe(sub)
+			}
 			log.Println(subscribePacket)
-			subackPacket := data
+			c.server.subManager.ListSubscriptions()
+			subackPacket := data.NewSubackPacket(subscribePacket)
+			c.conn.Write(subackPacket.ToByteArray())
 			break
 		case data.PUBLISH:
 			log.Print("Publish")

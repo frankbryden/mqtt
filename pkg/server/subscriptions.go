@@ -11,6 +11,13 @@ type SubscriptionManager struct {
 	subscriptions []data.Subscription
 }
 
+//NewSubscriptionManager constructs an empty subscription manager
+func NewSubscriptionManager() *SubscriptionManager {
+	return &SubscriptionManager{
+		subscriptions: []data.Subscription{},
+	}
+}
+
 //Subscribe a client to a topic using a Subscription instance
 func (s *SubscriptionManager) Subscribe(sub data.Subscription) {
 	s.subscriptions = append(s.subscriptions, sub)

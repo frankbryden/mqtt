@@ -27,6 +27,28 @@ func RemainingLengthDecode(data []byte) (int, int) {
 	return value, bytesRead
 }
 
+//RemainingLengthEncode encodes the size following the remaining length encoding
+//defined in the mqtt standard
+func RemainingLengthEncode(x int) []byte {
+	var output []byte
+	for {
+		encodedByte := x % 128
+
+		x = x / 128
+
+		// if there are more data to encode, set the top bit of this byte
+
+		if x > 0 {
+			encodedByte = encodedByte | 128
+		}
+		output = append(output, byte(encodedByte))
+		if x <= 0 {
+			break
+		}
+	}
+	return output
+}
+
 //GetUTFString returns a single (and first encountered) UTF string from data
 //along with the number of bytes read
 func GetUTFString(data []byte) (string, int) {

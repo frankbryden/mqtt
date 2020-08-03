@@ -2,6 +2,7 @@ package data
 
 import (
 	"log"
+	"mqtt/pkg/util"
 )
 
 type SubackPacket struct {
@@ -25,12 +26,25 @@ func NewSubackPacket(s *SubscribePacket) *SubackPacket {
 }
 
 func (cp *SubackPacket) ToByteArray() []byte {
-	resp := make([]byte, 4)
-	resp[0] = SUBACK
+	var resp []byte
 
-	bytePacketID := byte(cp.packetID)
-	resp[2] = bytePacketID >> 8
-	resp[3] = bytePacketID & 128
+	//Insert all the necesssary fields
+
+	//Packet Type: SUBACK
+	resp = append(resp, SUBACK)
+
+	//Remaining length is the 2 bytes for packet ID + payload length,
+	//which is 1 byte per return code
+	remainingLength := 2 + len(cp.returnCodes)
+	remainingLengthBytes := util.RemainingLengthEncode(remainingLength)
+	for _, remainingLengthByte := range remainingLengthBytes {
+		resp = append(resp, remainingLengthByte)
+	}
+
+	//Packet ID
+	bytePacketID := int16(cp.packetID)
+	resp = append(resp, byte(bytePacketID>>8))
+	resp = append(resp, byte(bytePacketID&128))
 
 	for _, b := range resp {
 		log.Printf("%08b", b)

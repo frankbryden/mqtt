@@ -57,3 +57,8 @@ func LoadSubscribePacket(data []byte, clientID string) (*SubscribePacket, error)
 		packetID:      packetID,
 	}, nil
 }
+
+//GetSubscriptions returns subscriptions associated with subscribe packet
+func (s *SubscribePacket) GetSubscriptions() []Subscription {
+	return s.subscriptions
+}

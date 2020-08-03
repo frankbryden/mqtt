@@ -7,10 +7,19 @@ import (
 )
 
 type Server struct {
+	subManager *SubscriptionManager
 }
 
 type Limbo struct {
 	conn net.Conn
+}
+
+//NewServer instantiates a server
+func NewServer() *Server {
+	subManager := NewSubscriptionManager()
+	return &Server{
+		subManager: subManager,
+	}
 }
 
 //Start the server
@@ -55,7 +64,7 @@ func (s *Server) HandleConn(conn net.Conn) {
 		connackPacket := data.NewConnackPacket(connectPacket)
 		conn.Write(connackPacket.ToByteArray())
 
-		c := NewClient(conn, connectPacket)
+		c := NewClient(s, conn, connectPacket)
 		c.Run()
 	}
 

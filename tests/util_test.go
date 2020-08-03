@@ -39,7 +39,17 @@ func TestDecodeRemainingLengthMaxValue(t *testing.T) {
 }
 
 func TestEncodeRemainingLength(t *testing.T) {
+	input := 321
 
+	expected := make([]byte, 2)
+	expected[0] = 193
+	expected[1] = 2
+
+	got := util.RemainingLengthEncode(input)
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("Got %d, expected %d", got, expected)
+	}
 }
 
 func TestSplitFilterStartEndSep(t *testing.T) {
