@@ -3,6 +3,8 @@ package data
 import (
 	"log"
 	"mqtt/pkg/util"
+
+	"github.com/google/uuid"
 )
 
 //ConnectPacketFlags represents flags set in CONNECT packet header
@@ -52,7 +54,13 @@ func LoadConnectPacket(data []byte) (*ConnectPacket, error) {
 
 	//Client Identifier
 	clientID, n := util.GetUTFString(payload)
-	connectPacket.clientID = clientID
+	if len(clientID) == 0 {
+		//Generate a random client ID for clients which do not provide one
+		connectPacket.clientID = uuid.New().String()
+	} else {
+		connectPacket.clientID = clientID
+	}
+
 	payload = payload[n:]
 
 	//Will Topic/Message

@@ -26,6 +26,7 @@ func (s *SubscriptionManager) Subscribe(sub data.Subscription) {
 //ListSubscriptions prints out all active subscriptions
 func (s *SubscriptionManager) ListSubscriptions() {
 	for _, sub := range s.subscriptions {
+		log.Print(sub)
 		log.Printf("Client [%s] subscribed to %s", sub.GetClientID(), sub.GetFilter())
 	}
 }

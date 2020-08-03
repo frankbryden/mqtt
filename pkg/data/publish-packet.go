@@ -24,9 +24,21 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 	log.Printf("dup %d, qos %d, retain %d", dup, qos, retain)
 
 	packetSize, bytesRead := util.RemainingLengthDecode(data[1:5])
+
+	variableHeader := data[bytesRead+1:]
+
+	topicName, n := util.GetUTFString(variableHeader)
 	log.Printf("The packet is %d bytes long", packetSize)
 
-	payload := data[bytesRead : packetSize+1]
+	variableHeader = data[bytesRead+1:]
+
+	//check qos to see if packet id will be present
+	packetID := -1
+	if qos > 0 {
+		packetID = 
+	}
+
+	payload := variableHeader[bytesRead : packetSize+1]
 	log.Printf("Payload: %v, %s", payload, payload)
 	for i := 0; i < 10; i++ {
 		log.Printf("Byte: %d: %08b (-> %d)", i+1, payload[i], payload[i])
