@@ -7,6 +7,12 @@ import (
 
 //PublishPacket represents a single subscribe packet
 type PublishPacket struct {
+	topic          Topic
+	data           []byte
+	dup            byte
+	retain         byte
+	qos            int
+	originalPacket []byte
 }
 
 //LoadPublishPacket creates a ConnectPacket instance from the incoming packet data
@@ -17,7 +23,7 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 	//DUP flag
 	dup := (header >> 3) & 1
 	//Qos flag
-	qos := (header >> 1) & 3
+	qos := int((header >> 1) & 3)
 	//retain flag
 	retain := header & 1
 
@@ -25,9 +31,12 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 
 	packetSize, bytesRead := util.RemainingLengthDecode(data[1:5])
 
+	variableHeaderLen := 0
 	variableHeader := data[bytesRead+1:]
 
 	topicName, n := util.GetUTFString(variableHeader)
+	variableHeaderLen += n
+	topic := SplitFilter(topicName)
 	log.Printf("The packet is %d bytes long", packetSize)
 
 	variableHeader = data[n+1:]
@@ -37,18 +46,59 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 	byteShift := 0
 	if qos > 0 {
 		byteShift = 2
+		variableHeaderLen += byteShift
 		packetID = int(variableHeader[0])*256 + int(variableHeader[1])
 	}
 
-	payload := variableHeader[bytesRead+byteShift+1 : packetSize+1]
-	log.Printf("Payload: %v, %s", payload, payload)
-	for i := 0; i < 10; i++ {
-		log.Printf("Byte: %d: %08b (-> %d)", i+1, payload[i], payload[i])
-	}
-
-	publishData, n := util.GetUTFString(payload)
+	payload := variableHeader[bytesRead+byteShift : packetSize+1]
+	publishData := payload[:packetSize-variableHeaderLen]
 
 	log.Printf("[%d] %s -> %s", packetID, topicName, publishData)
 
-	return &PublishPacket{}, nil
+	return &PublishPacket{
+		topic:          topic,
+		data:           publishData,
+		dup:            dup,
+		retain:         retain,
+		qos:            qos,
+		originalPacket: data,
+	}, nil
+}
+
+func (pp *PublishPacket) ToByteArray() []byte {
+	var resp []byte
+
+	//Insert all the necesssary fields
+
+	//Packet Type: PUBLISH
+	header := PUBLISH & pp.dup << 3 & byte(pp.qos) << 1 & pp.retain
+	resp = append(resp, header)
+
+	//Remaining length is the 2 bytes for packet ID + payload length,
+	//which is 1 byte per return code
+	/*
+		remainingLength := 2 + len(cp.returnCodes)
+		remainingLengthBytes := util.RemainingLengthEncode(remainingLength)
+		for _, remainingLengthByte := range remainingLengthBytes {
+			resp = append(resp, remainingLengthByte)
+		}
+
+		//Packet ID
+		bytePacketID := int16(cp.packetID)
+		resp = append(resp, byte(bytePacketID>>8))
+		resp = append(resp, byte(bytePacketID&128))
+
+		for _, b := range resp {
+			log.Printf("%08b", b)
+		}
+	*/
+	return resp
+}
+
+func (pp *PublishPacket) GetOriginalPacket() []byte {
+	return pp.originalPacket
+}
+
+func (pp *PublishPacket) GetTopic() Topic {
+	return pp.topic
 }

@@ -64,7 +64,8 @@ func (c *Client) serveRequests() {
 		log.Print(string(buffer))
 
 		header := buffer[0]
-		log.Printf("Header: %08b, %08b, %d", header, header>>4, int(header>>4))
+		//log.Printf("Header: %08b, %08b, %d", header, header>>4, int(header>>4))
+		log.Printf(string(buffer))
 		packetType := int(header >> 4)
 		controlPacket, err := data.FromPacketType(packetType)
 		log.Printf("Received control packet of type %v", controlPacket.PacketType)
@@ -86,7 +87,18 @@ func (c *Client) serveRequests() {
 			break
 		case data.PUBLISH:
 			log.Print("Publish")
+			publishPacket, _ := data.LoadPublishPacket(buffer)
+			log.Print(publishPacket)
+			c.server.DispatchPublish(publishPacket)
 			break
 		}
 	}
+}
+
+//Send data to a client
+func (c *Client) Send(data []byte) {
+	log.Printf("Sent %d bytes to %s", len(data), c.clientID)
+	log.Printf(string(data))
+	c.conn.Write(data)
+	c.conn.Write([]byte("\n"))
 }

@@ -6,12 +6,10 @@ import (
 	"net"
 )
 
+//Server is the core of the mqtt broker
 type Server struct {
 	subManager *SubscriptionManager
-}
-
-type Limbo struct {
-	conn net.Conn
+	clients    map[string]*Client
 }
 
 //NewServer instantiates a server
@@ -19,6 +17,7 @@ func NewServer() *Server {
 	subManager := NewSubscriptionManager()
 	return &Server{
 		subManager: subManager,
+		clients:    make(map[string]*Client),
 	}
 }
 
@@ -65,7 +64,15 @@ func (s *Server) HandleConn(conn net.Conn) {
 		conn.Write(connackPacket.ToByteArray())
 
 		c := NewClient(s, conn, connectPacket)
+		s.clients[connectPacket.GetClientID()] = c
 		c.Run()
 	}
 
+}
+
+//DispatchPublish retransmists a publish packet to subscribed clients
+func (s *Server) DispatchPublish(pp *data.PublishPacket) {
+	for _, clientID := range s.subManager.GetMatchingClients(pp.GetTopic()) {
+		s.clients[clientID].Send(pp.GetOriginalPacket())
+	}
 }
