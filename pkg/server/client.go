@@ -55,6 +55,8 @@ func (c *Client) serveRequests() {
 			return
 		}
 
+		buffer = buffer[:n]
+
 		log.Printf("Read %d bytes", n)
 		if n == 0 {
 			log.Printf("Skipping empty read")
@@ -87,6 +89,7 @@ func (c *Client) serveRequests() {
 			break
 		case data.PUBLISH:
 			log.Print("Publish")
+			log.Print(buffer)
 			publishPacket, _ := data.LoadPublishPacket(buffer)
 			log.Print(publishPacket)
 			c.server.DispatchPublish(publishPacket)

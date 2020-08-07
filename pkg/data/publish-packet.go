@@ -16,10 +16,13 @@ type PublishPacket struct {
 }
 
 //LoadPublishPacket creates a ConnectPacket instance from the incoming packet data
-func LoadPublishPacket(data []byte) (*PublishPacket, error) {
-	log.Printf("Loading connect packet with %d bytes", len(data))
+func LoadPublishPacket(packetData []byte) (*PublishPacket, error) {
+	log.Printf("Loading connect packet with %d bytes", len(packetData))
+	log.Printf("Begin")
+	log.Print(packetData)
+	originalPacket := packetData
 
-	header := data[0]
+	header := packetData[0]
 	//DUP flag
 	dup := (header >> 3) & 1
 	//Qos flag
@@ -29,17 +32,17 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 
 	log.Printf("dup %d, qos %d, retain %d", dup, qos, retain)
 
-	packetSize, bytesRead := util.RemainingLengthDecode(data[1:5])
+	packetSize, bytesRead := util.RemainingLengthDecode(packetData[1:5])
 
 	variableHeaderLen := 0
-	variableHeader := data[bytesRead+1:]
+	variableHeader := packetData[bytesRead+1:]
 
 	topicName, n := util.GetUTFString(variableHeader)
 	variableHeaderLen += n
 	topic := SplitFilter(topicName)
 	log.Printf("The packet is %d bytes long", packetSize)
 
-	variableHeader = data[n+1:]
+	variableHeader = packetData[n+1:]
 
 	//check qos to see if packet id will be present
 	packetID := -1
@@ -53,6 +56,10 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 	payload := variableHeader[bytesRead+byteShift : packetSize+1]
 	publishData := payload[:packetSize-variableHeaderLen]
 
+	log.Printf("Original packet")
+	log.Printf(string(originalPacket))
+	log.Printf(string(packetData[:2+packetSize]))
+
 	log.Printf("[%d] %s -> %s", packetID, topicName, publishData)
 
 	return &PublishPacket{
@@ -61,7 +68,7 @@ func LoadPublishPacket(data []byte) (*PublishPacket, error) {
 		dup:            dup,
 		retain:         retain,
 		qos:            qos,
-		originalPacket: data,
+		originalPacket: packetData,
 	}, nil
 }
 
