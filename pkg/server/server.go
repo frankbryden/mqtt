@@ -24,7 +24,7 @@ func NewServer() *Server {
 //Start the server
 func (s *Server) Start() {
 
-	ln, err := net.Listen("tcp", "127.0.0.1:1883")
+	ln, err := net.Listen("tcp", "0.0.0.0:1883")
 	log.Printf("Listening on port %d", 1883)
 	if err != nil {
 		// handle error
@@ -73,6 +73,6 @@ func (s *Server) HandleConn(conn net.Conn) {
 //DispatchPublish retransmists a publish packet to subscribed clients
 func (s *Server) DispatchPublish(pp *data.PublishPacket) {
 	for _, clientID := range s.subManager.GetMatchingClients(pp.GetTopic()) {
-		s.clients[clientID].Send(pp.GetOriginalPacket())
+		s.clients[clientID].Send(pp.ToByteArray())
 	}
 }

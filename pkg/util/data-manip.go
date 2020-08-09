@@ -57,3 +57,25 @@ func GetUTFString(data []byte) (string, int) {
 	log.Printf("From %08b %08b, we get %d (%s)", lengthData[0], lengthData[1], length, data[2:length+2])
 	return string(data[2 : length+2]), length + 2
 }
+
+//EncodeUTFString takes a string and returns a slice of bytes with
+//the string prepended by its length (2 bytes)
+func EncodeUTFString(data string) []byte {
+	res := make([]byte, len(data)+2)
+	byteLen := Get2ByteInt(len(data))
+	res[0] = byteLen[0]
+	res[1] = byteLen[1]
+	for i, v := range []byte(data) {
+		res[i+2] = v
+	}
+	return res
+}
+
+//Get2ByteInt returns 2 bytes making up the int
+func Get2ByteInt(data int) []byte {
+	res := make([]byte, 2)
+	byteInt := int16(data)
+	res[0] = byte(byteInt >> 8)
+	res[1] = byte(byteInt & 255)
+	return res
+}

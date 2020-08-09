@@ -13,14 +13,7 @@ type SubscribePacket struct {
 
 //LoadSubscribePacket creates a ConnectPacket instance from the incoming packet data
 func LoadSubscribePacket(data []byte, clientID string) (*SubscribePacket, error) {
-	log.Printf("Loading subscribe packet with %d bytes", len(data))
-
 	packetSize, bytesRead := util.RemainingLengthDecode(data[1:5])
-	log.Printf("The packet is %d bytes long (read %d bytes)", packetSize, bytesRead)
-
-	for i := 0; i < packetSize; i++ {
-		log.Printf("%08b ( -> %d)", data[i], data[i])
-	}
 
 	variableHeader := data[bytesRead+1:]
 
@@ -44,7 +37,6 @@ func LoadSubscribePacket(data []byte, clientID string) (*SubscribePacket, error)
 			qos:      qos,
 		}
 		topics = append(topics, subscription)
-		log.Println(subscription)
 		if packetSize == 0 {
 			break
 		}

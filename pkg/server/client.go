@@ -85,7 +85,8 @@ func (c *Client) serveRequests() {
 			log.Println(subscribePacket)
 			c.server.subManager.ListSubscriptions()
 			subackPacket := data.NewSubackPacket(subscribePacket)
-			c.conn.Write(subackPacket.ToByteArray())
+			n, err := c.conn.Write(subackPacket.ToByteArray())
+			log.Printf("Sent SUBACK: Wrote %d bytes (%v)", n, err)
 			break
 		case data.PUBLISH:
 			log.Print("Publish")
@@ -100,8 +101,9 @@ func (c *Client) serveRequests() {
 
 //Send data to a client
 func (c *Client) Send(data []byte) {
-	log.Printf("Sent %d bytes to %s", len(data), c.clientID)
-	log.Printf(string(data))
-	c.conn.Write(data)
-	c.conn.Write([]byte("\n"))
+	n, err := c.conn.Write(data)
+	for i := 0; i < 5; i++ {
+		//c.conn.Write([]byte("Hey " + string(i) + " FRANKIE"))
+	}
+	log.Printf("Wrote %d bytes (%s), sent to %s", n, err, c.clientID)
 }

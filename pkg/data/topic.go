@@ -40,7 +40,6 @@ func NewSubscriptionFromTopic(raw string) *Subscription {
 //MatchesTopic returns true if the provided topic is contained within
 //the underlying subscription
 func (s *Subscription) MatchesTopic(t Topic) bool {
-	log.Println(s.filter)
 	if len(t) < len(s.filter) {
 		//The only way this can match is if the next level is the final level
 		//and it contains a multi wild card
@@ -76,7 +75,6 @@ func ValidateFilter(filter Topic) bool {
 		return false
 	}
 	for i, token := range filter {
-		log.Println(token)
 		if token == MultiWildCard {
 			/*
 				MultiWildCard must obey 3 rules:

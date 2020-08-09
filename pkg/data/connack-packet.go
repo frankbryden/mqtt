@@ -15,6 +15,7 @@ func NewConnackPacket(connectPacket *ConnectPacket) *ConnackPacket {
 	}
 }
 
+//ToByteArray returns the necessary bytes to send the packet over the wire
 func (cp *ConnackPacket) ToByteArray() []byte {
 	data := make([]byte, 4)
 

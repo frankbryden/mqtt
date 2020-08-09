@@ -52,6 +52,19 @@ func TestEncodeRemainingLength(t *testing.T) {
 	}
 }
 
+func TestEncodeRemainingLengthSingleByte(t *testing.T) {
+	input := 61
+
+	expected := make([]byte, 1)
+	expected[0] = 61
+
+	got := util.RemainingLengthEncode(input)
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("Got %d, expected %d", got, expected)
+	}
+}
+
 func TestSplitFilterStartEndSep(t *testing.T) {
 	input := "/bathroom/temp/"
 	expected := data.Topic{"", "/", "bathroom", "/", "temp", "/", ""}

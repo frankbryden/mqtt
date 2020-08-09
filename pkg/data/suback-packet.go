@@ -5,11 +5,13 @@ import (
 	"mqtt/pkg/util"
 )
 
+//SubackPacket is the response to a SUBSCRIBE packet
 type SubackPacket struct {
 	packetID    int
 	returnCodes []int
 }
 
+//NewSubackPacket instantiates a SUBACK packet from a SUBSCRIBE packet
 func NewSubackPacket(s *SubscribePacket) *SubackPacket {
 	returnCodes := make([]int, len(s.subscriptions))
 	for i, sub := range s.subscriptions {
@@ -25,13 +27,14 @@ func NewSubackPacket(s *SubscribePacket) *SubackPacket {
 	}
 }
 
+//ToByteArray returns the necessary bytes to send the packet over the wire
 func (cp *SubackPacket) ToByteArray() []byte {
 	var resp []byte
 
 	//Insert all the necesssary fields
 
 	//Packet Type: SUBACK
-	resp = append(resp, SUBACK)
+	resp = append(resp, SUBACK<<4)
 
 	//Remaining length is the 2 bytes for packet ID + payload length,
 	//which is 1 byte per return code
@@ -44,7 +47,12 @@ func (cp *SubackPacket) ToByteArray() []byte {
 	//Packet ID
 	bytePacketID := int16(cp.packetID)
 	resp = append(resp, byte(bytePacketID>>8))
-	resp = append(resp, byte(bytePacketID&128))
+	resp = append(resp, byte(bytePacketID&255))
+	log.Printf("Packet ID %d becomes %d", cp.packetID, bytePacketID)
+
+	for _, returnCode := range cp.returnCodes {
+		resp = append(resp, byte(returnCode))
+	}
 
 	for _, b := range resp {
 		log.Printf("%08b", b)
