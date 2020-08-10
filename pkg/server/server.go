@@ -24,7 +24,7 @@ func NewServer() *Server {
 //Start the server
 func (s *Server) Start() {
 
-	ln, err := net.Listen("tcp", "0.0.0.0:1883")
+	ln, err := net.Listen("tcp", "127.0.0.1:1883")
 	log.Printf("Listening on port %d", 1883)
 	if err != nil {
 		// handle error
